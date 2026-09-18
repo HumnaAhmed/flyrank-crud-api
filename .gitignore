@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+.venv/
+main_final_backup.py
+requirements_final_backup.txt
