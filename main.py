@@ -10,6 +10,11 @@ class TaskCreate(BaseModel):
     title: str = Field(min_length=1)
 
 
+class TaskUpdate(BaseModel):
+    title: str | None = Field(default=None, min_length=1)
+    done: bool | None = None
+
+
 tasks = [
     {"id": 1, "title": "Learn FastAPI", "done": False},
     {"id": 2, "title": "Build a CRUD API", "done": False},
@@ -74,3 +79,49 @@ def create_task(task_data: TaskCreate):
     tasks.append(new_task)
 
     return new_task
+
+
+@app.put("/tasks/{task_id}")
+def update_task(task_id: int, task_data: TaskUpdate):
+    for task in tasks:
+        if task["id"] == task_id:
+            updates = task_data.model_dump(exclude_unset=True)
+
+            if not updates:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Update body cannot be empty"
+                )
+
+            if "title" in updates and updates["title"] is None:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Title cannot be empty"
+                )
+
+            if "done" in updates and updates["done"] is None:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Done must be a boolean"
+                )
+
+            task.update(updates)
+            return task
+
+    raise HTTPException(
+        status_code=404,
+        detail=f"Task {task_id} not found"
+    )
+
+
+@app.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_task(task_id: int):
+    for task in tasks:
+        if task["id"] == task_id:
+            tasks.remove(task)
+            return
+
+    raise HTTPException(
+        status_code=404,
+        detail=f"Task {task_id} not found"
+    )
