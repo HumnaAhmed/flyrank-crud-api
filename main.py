@@ -3,6 +3,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
+
 app = FastAPI()
 
 
@@ -20,6 +21,17 @@ tasks = [
     {"id": 2, "title": "Build a CRUD API", "done": False},
     {"id": 3, "title": "Write the README", "done": True},
 ]
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(
+    request: Request,
+    exc: HTTPException
+):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"error": exc.detail}
+    )
 
 
 @app.exception_handler(RequestValidationError)
