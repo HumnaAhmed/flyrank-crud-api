@@ -33,7 +33,10 @@ async def validation_exception_handler(
     )
 
 
-@app.get("/")
+@app.get(
+    "/",
+    description="Show basic information about the Task API."
+)
 def home():
     return {
         "name": "Task API",
@@ -42,19 +45,28 @@ def home():
     }
 
 
-@app.get("/health")
+@app.get(
+    "/health",
+    description="Check whether the API is running."
+)
 def health():
     return {
         "status": "ok"
     }
 
 
-@app.get("/tasks")
+@app.get(
+    "/tasks",
+    description="Return all tasks."
+)
 def get_tasks():
     return tasks
 
 
-@app.get("/tasks/{task_id}")
+@app.get(
+    "/tasks/{task_id}",
+    description="Return one task by ID."
+)
 def get_task(task_id: int):
     for task in tasks:
         if task["id"] == task_id:
@@ -66,9 +78,16 @@ def get_task(task_id: int):
     )
 
 
-@app.post("/tasks", status_code=status.HTTP_201_CREATED)
+@app.post(
+    "/tasks",
+    status_code=status.HTTP_201_CREATED,
+    description="Create a new task."
+)
 def create_task(task_data: TaskCreate):
-    next_id = max((task["id"] for task in tasks), default=0) + 1
+    next_id = max(
+        (task["id"] for task in tasks),
+        default=0
+    ) + 1
 
     new_task = {
         "id": next_id,
@@ -81,11 +100,16 @@ def create_task(task_data: TaskCreate):
     return new_task
 
 
-@app.put("/tasks/{task_id}")
+@app.put(
+    "/tasks/{task_id}",
+    description="Update a task by ID."
+)
 def update_task(task_id: int, task_data: TaskUpdate):
     for task in tasks:
         if task["id"] == task_id:
-            updates = task_data.model_dump(exclude_unset=True)
+            updates = task_data.model_dump(
+                exclude_unset=True
+            )
 
             if not updates:
                 raise HTTPException(
@@ -106,6 +130,7 @@ def update_task(task_id: int, task_data: TaskUpdate):
                 )
 
             task.update(updates)
+
             return task
 
     raise HTTPException(
@@ -114,7 +139,11 @@ def update_task(task_id: int, task_data: TaskUpdate):
     )
 
 
-@app.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
+@app.delete(
+    "/tasks/{task_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    description="Delete a task by ID."
+)
 def delete_task(task_id: int):
     for task in tasks:
         if task["id"] == task_id:
